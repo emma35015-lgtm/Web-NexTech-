@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NexTech Industries | Simulación Dinámica</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            /* Colores Originales / Claros */
+            --bg-color: #ffffff; /* Fondo blanco */
+            --text-color: #1a1a1a; /* Texto casi negro para lectura */
+            --text-secondary: #555555;
+            --accent-color: #0056b3; /* Azul industrial sólido (más serio que el neón) */
+            
+            /* Efecto Vidrio para fondo claro */
+            --glass-bg: rgba(255, 255, 255, 0.65);
+            --glass-border: rgba(0, 0, 0, 0.1);
+            --card-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.10);
+            --card-hover: rgba(240, 248, 255, 0.8);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        /* Canvas 3D de fondo */
+        #canvas-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            /* Degradado sutil claro */
+            background: radial-gradient(circle at center, #f8f9fa 0%, #e9ecef 100%);
+        }
+
+        /* Layout Principal */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Header */
+        header {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: flex-start;
+            padding-left: 5%;
+        }
+
+        h1 {
+            font-size: 4rem;
+            font-weight: 800;
+            letter-spacing: -2px;
+            margin-bottom: 10px;
+            color: #000; /* Título negro sólido */
+            text-shadow: none;
+        }
+
+        .subtitle {
+            font-size: 1.5rem;
+            color: var(--text-secondary);
+            margin-bottom: 20px;
+            max-width: 600px;
+            font-weight: 300;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border: 1px solid var(--accent-color);
+            color: var(--accent-color);
+            border-radius: 50px;
+            font-size: 0.9rem;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            background: rgba(0, 86, 179, 0.05);
+        }
+
+        .btn-scroll {
+            margin-top: 40px;
+            padding: 12px 30px;
+            background: var(--text-color);
+            border: none;
+            color: white;
+            cursor: pointer;
+            transition: 0.3s;
+            font-size: 1rem;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+
+        .btn-scroll:hover {
+            background: var(--accent-color);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 86, 179, 0.3);
+        }
+
+        /* Secciones Generales */
+        section {
+            padding: 100px 0;
+        }
+
+        .section-title {
+            font-size: 2.5rem;
+            margin-bottom: 50px;
+            border-left: 4px solid var(--accent-color);
+            padding-left: 20px;
+            color: #000;
+        }
+
+        /* Grid de Tarjetas */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+
+        .card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(8px);
+            border: 1px solid var(--glass-border);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: var(--card-shadow);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            background: var(--card-hover);
+            border-color: var(--accent-color);
+            box-shadow: 0 12px 40px 0 rgba(31, 38, 135, 0.15);
+        }
+
+        .card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            color: #000;
+        }
+
+        .card p {
+            color: var(--text-secondary);
+        }
+
+        .card ul {
+            list-style-position: inside;
+            color: var(--text-secondary);
+            margin-top: 10px;
+        }
+        
+        .card li {
+            margin-bottom: 8px;
+        }
+
+        /* Estilos para Fórmulas */
+        .formula-box {
+            font-family: 'Courier New', monospace;
+            background: #f1f3f5;
+            padding: 10px;
+            border-radius: 6px;
+            margin: 15px 0;
+            color: var(--accent-color);
+            font-weight: bold;
+            border-left: 3px solid var(--accent-color);
+        }
+
+        /* Footer */
+        footer {
+            margin-top: 50px;
+            padding: 50px 0;
+            border-top: 1px solid #eee;
+            text-align: center;
+            color: #888;
+            background: #fafafa;
+        }
+
+        .contact-info a {
+            color: var(--accent-color);
+            text-decoration: none;
+            margin: 0 10px;
+            font-weight: 600;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            h1 { font-size: 2.5rem; }
+            header { padding-left: 20px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="canvas-container"></div>
+
+    <div class="container">
+        
+        <header>
+            <div class="badge">León, Guanajuato • Est. 2020</div>
+            <h1>NexTech Industries</h1>
+            <p class="subtitle">Simulación de física de alta fidelidad para la industria del futuro. Optimizamos procesos complejos antes de la implementación.</p>
+            <button class="btn-scroll" onclick="document.getElementById('about').scrollIntoView({behavior: 'smooth'})">Explorar Proyecto</button>
+        </header>
+
+        <section id="about">
+            <h2 class="section-title">Acerca de Nosotros</h2>
+            <div class="card">
+                <p><strong>NexTech Industries</strong> es una empresa leonesa especializada en optimización de procesos industriales mediante simulación física y análisis computacional. Con sede en el Parque Industrial Delta, nuestro equipo trabaja para resolver problemas reales reduciendo costos y mejorando la eficiencia.</p>
+                <br>
+                <h3>Nuestra Misión</h3>
+                <p>Transformar la industria local aplicando física e ingeniería a problemas de producción.</p>
+            </div>
+        </section>
+
+        <section id="simuladores">
+            <h2 class="section-title">Simuladores Dinámicos</h2>
+            <div class="grid">
+                <div class="card">
+                    <h3>📦 Colisiones en Línea de Empaque</h3>
+                    <p>Modelado de productos en banda transportadora con física en tiempo real.</p>
+                    <ul>
+                        <li>Choques entre productos con diferentes masas.</li>
+                        <li>Visualización de vectores de velocidad.</li>
+                        <li>Métricas: momento, energía, colisiones totales.</li>
+                    </ul>
+                    <div class="formula-box">e = |v₁' - v₂'| / |v₁ - v₂|</div>
+                </div>
+
+                <div class="card">
+                    <h3>🤖 Brazo Robótico Industrial</h3>
+                    <p>Control de posición y movimiento de un brazo de 2 articulaciones.</p>
+                    <ul>
+                        <li>Cinemática directa e inversa.</li>
+                        <li>Visualización de velocidades angulares.</li>
+                        <li>Cálculo de Torque y Momento de Inercia.</li>
+                    </ul>
+                    <div class="formula-box">τ = I · α</div>
+                </div>
+            </div>
+        </section>
+
+        <section id="formulas">
+            <h2 class="section-title">Fundamentos Físicos</h2>
+            <div class="grid">
+                <div class="card">
+                    <h3>Momento Lineal</h3>
+                    <div class="formula-box">p = m · v</div>
+                    <p>Es la "cantidad de movimiento". Fundamental para entender el impacto de productos pesados en movimiento.</p>
+                </div>
+                <div class="card">
+                    <h3>Energía Cinética</h3>
+                    <div class="formula-box">E = ½ · m · v²</div>
+                    <p>La energía del movimiento. Duplicar la velocidad cuadruplica la energía, haciendo los choques rápidos más destructivos.</p>
+                </div>
+                <div class="card">
+                    <h3>Velocidad Angular</h3>
+                    <div class="formula-box">ω = dθ/dt</div>
+                    <p>Rapidez de rotación. Esencial para calcular la velocidad del efector final del robot.</p>
+                </div>
+                <div class="card">
+                    <h3>Torque</h3>
+                    <div class="formula-box">τ = I · α</div>
+                    <p>La "fuerza de giro". Determina qué tan potentes deben ser los motores para mover el brazo robótico.</p>
+                </div>
+            </div>
+        </section>
+
+        <footer>
+            <p>© 2025 NexTech Industries • Simulador de Procesos Industriales v2.0</p>
+            <p>Parque Industrial Delta, León, Guanajuato</p>
+            <div class="contact-info">
+                <a href="mailto:contacto@nextech.com">Contacto</a>
+            </div>
+        </footer>
+
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    
+    <script>
+        // Configuración básica de Three.js
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        
+        // Renderer con transparencia para ver el fondo CSS
+        const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+        
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.getElementById('canvas-container').appendChild(renderer.domElement);
+
+        // Creación de partículas (Simulando nodos industriales)
+        const geometry = new THREE.BufferGeometry();
+        const count = 180; // Un poco menos de partículas para diseño limpio
+        const positions = new Float32Array(count * 3);
+        
+        for(let i = 0; i < count * 3; i++) {
+            positions[i] = (Math.random() - 0.5) * 25; 
+        }
+        
+        geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+        
+        // Material de los puntos (Color oscuro para contrastar con fondo blanco)
+        const material = new THREE.PointsMaterial({
+            size: 0.15,
+            color: 0x0056b3, // Azul Industrial
+            transparent: true,
+            opacity: 0.7
+        });
+
+        const particles = new THREE.Points(geometry, material);
+        scene.add(particles);
+
+        // Conexiones (Líneas sutiles grises/azules)
+        const lineMaterial = new THREE.LineBasicMaterial({
+            color: 0xadb5bd, // Gris azulado suave
+            transparent: true,
+            opacity: 0.3
+        });
+        
+        const linesGeometry = new THREE.BufferGeometry();
+        const lines = new THREE.LineSegments(linesGeometry, lineMaterial);
+        scene.add(lines);
+
+        camera.position.z = 5;
+
+        // Interacción con el Mouse
+        let mouseX = 0;
+        let mouseY = 0;
+        let targetX = 0;
+        let targetY = 0;
+
+        const windowHalfX = window.innerWidth / 2;
+        const windowHalfY = window.innerHeight / 2;
+
+        document.addEventListener('mousemove', (event) => {
+            mouseX = (event.clientX - windowHalfX);
+            mouseY = (event.clientY - windowHalfY);
+        });
+
+        // Animación
+        const animate = function () {
+            requestAnimationFrame(animate);
+
+            targetX = mouseX * 0.001;
+            targetY = mouseY * 0.001;
+
+            // Rotación de la estructura
+            particles.rotation.y += 0.0015;
+            particles.rotation.x += 0.0005;
+            
+            // Reacción suave al mouse
+            particles.rotation.y += 0.05 * (targetX - particles.rotation.y);
+            particles.rotation.x += 0.05 * (targetY - particles.rotation.x);
+
+            // Sincronizar líneas con puntos
+            lines.rotation.x = particles.rotation.x;
+            lines.rotation.y = particles.rotation.y;
+
+            renderer.render(scene, camera);
+        };
+
+        // Responsive
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        animate();
+    </script>
+</body>
+</html>
